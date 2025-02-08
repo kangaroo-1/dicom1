@@ -1,0 +1,3 @@
+X-ray: A medical imaging technique that uses X-rays to view the inside of the body. 
+MRI: Magnetic Resonance Imaging, uses magnetic fields and radio waves.
+CT scan: Computed Tomography, a series of X-ray images taken from different angles.

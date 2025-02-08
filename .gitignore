@@ -10,6 +10,8 @@ frontend/!.yarn/patches
 !.yarn/releases
 !.yarn/versions
 
+backend/node_modules/
+
 # testing
 frontend/coverage
 
