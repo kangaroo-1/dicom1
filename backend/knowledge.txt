@@ -1,3 +1,16 @@
+Common Modality Types:
 X-ray: A medical imaging technique that uses X-rays to view the inside of the body. 
 MRI: Magnetic Resonance Imaging, uses magnetic fields and radio waves.
 CT scan: Computed Tomography, a series of X-ray images taken from different angles.
+CR:Digital X-ray using imaging plates.
+US (Ultrasound)Imaging using high-frequency sound waves.
+XR (X-ray)Standard X-ray imaging.
+MG (Mammography)X-ray imaging of the breast.
+NM (Nuclear Medicine)Imaging using radioactive tracers.
+PT (Positron Emission Tomography)Nuclear imaging technique for metabolic processes.
+DX (Digital Radiography)Digital X-ray imaging (similar to CR but direct).
+RF (Radio Fluoroscopy)Continuous real-time X-ray imaging.
+DS (Digital Subtraction Angiography)Enhanced angiography by removing background structures.
+ECG (Electrocardiography)Electrical activity of the heart.
+EPS (Electrophysiology Study)Study of electrical activity of the heart.
+OP (Ophthalmology Photography)Imaging of the eye.
