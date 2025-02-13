@@ -24,7 +24,7 @@ async function setupVectorStore() {
       });
     const chunkedTexts = await textSplitter.splitDocuments(docs);
     // const contents =  chunkedTexts.map(docs => docs.pageContent);
-    console.log(chunkedTexts);
+    // console.log(chunkedTexts);
     const embeddings = new HuggingFaceTransformersEmbeddings({
         model: "Xenova/all-MiniLM-L6-v2",
     });
@@ -35,6 +35,13 @@ async function setupVectorStore() {
         queryName: "match_documents",
     });
     await vectorStore.addDocuments(chunkedTexts);
+
+    const similaritySearchResults = await vectorStore.similaritySearch(
+        "NM",
+        1,
+    );
+    const content = similaritySearchResults[0].pageContent;
+    console.log(content)
 }
 
 
@@ -52,6 +59,12 @@ async function signInWithMagicLink() {
     });
    
 }
+
+
+async function queryVectorBase(query) {
+    
+}
+
 
 
 
