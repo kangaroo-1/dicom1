@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {supabase} from '../supabaseClient.js'
 import ChatMessage from "@/components/chatbox/ChatMessage";
 import { Input } from "@/components/ui/input";
@@ -9,61 +9,108 @@ import { Trash } from 'lucide-react';
 
 
 function ChatboxPage() {
-    const [messages, setMessages] = useState<Message[] | null>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [input, setInput] = useState<string>("");
     const [isLoading, setLoading] = useState();
+    const inputRef = useRef<HTMLInputElement>();
+    const scrollRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const fetchMessages = async() => {
             const { data, error } = await supabase
                 .from("messages")
                 .select("*")
                 .order("created_at", { ascending: true });
-            if (data?.length === 0) {
+            if (data && data?.length === 0) {
                     // Set initial message if no chat history exists
                 setMessages(
-                    [
+                [
                     { id: 1, role: "assistant", content: "Hello! How can I help you today?", created_at: new Date().toISOString()},
                     { id: 2, role: "user", content: "hi, im the user", created_at: new Date().toISOString()}
                 ]);
             } else {
+                    if (data!)
                     setMessages(data);
             }
         }
 
         fetchMessages();
-       
+
+        //real-time subscription
+        const subscription = supabase.
+                                channel('messages')
+                                .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+                                    setMessages((prev) => [...prev, payload.new as Message]);
+                                }).subscribe();
+        return () => {
+            supabase.removeChannel(subscription);
+        };
 
     },[])
 
+    useEffect(() => {
+        // if (scrollRef.current) {
+        //     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        // }
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
 
+    const handleSubmitMessage = async () => {
+        if (!input?.trim()) return;
+        const newMessage = {
+            role: "user",  
+            content: input,
+          };
+        try {
+            console.log("handleSubmitMessage");
+            const { data, error } = await supabase
+            .from("messages")
+            .insert(newMessage);
+            setInput("");
+        } catch (error) {
+            console.log("error")
+        }
 
+    };
 
+    const handleInputChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+        setInput(e.target.value)
+    }
+
+    // useEffect(() => {
+    //     console.log("input: ", input);
+    // }, [input])
 
     return (
-        <div className='flex flex-col bg-slate-100'>
+        <div className='flex flex-col bg-slate-100 h-screen'>
             {/* display chat  */}
-            <div className="mt-3 h-full overflow-y-auto px-3">
+            <div className="flex-grow h-full overflow-y-auto px-3" ref={scrollRef}>
                 {messages?.map((msg) => (
                     <ChatMessage 
                         key={msg.id}
                         message={{
                             role: msg.role,
                             content: msg.content
-                    }} />
+                        }} />
                 ))}
             </div>
 
             {/* chat input */}
-            <div className="flex">
+            <div className="sticky bottom-0 flex items-center p-3" >
                 <Button variant="ghost" className="">
                     <Trash />
                 </Button>
 
                 <Input 
+                    onChange={(e) => handleInputChange(e)}
+                    value={input}
                     className="grow border rounded bg-background"
                     placeholder="say something..."
                 />
-                <Button variant="ghost" disabled={isLoading || messages?.length == 0}>
+                <Button 
+                    variant="ghost" 
+                    onClick={handleSubmitMessage}
+                    disabled={isLoading || messages?.length == 0}>
                     <SendHorizontal size={50}/>
                 </Button>
             </div>
