@@ -2,8 +2,6 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-
 const openRouterApiKey = process.env.OPENROUTER_API_KEY
 
 const user_request = 'Find all US images for lucy';
@@ -12,13 +10,26 @@ const USER_PROMPT = `dicom is table to store metadata associated with a dicom. d
 
 
 const USER_PROMPT2 = '';
-async function fetchOpenRouterResponse() {
+export default async function fetchOpenRouterResponse(context, userMessage) {
     try {
         const response = await axios.post(
             "https://openrouter.ai/api/v1/chat/completions",
             {
-                model: "google/gemini-2.0-flash-thinking-exp:free",  // Choose an available model
-                messages: [{ role: "user", content: USER_PROMPT }],
+                model: "google/gemini-2.0-flash-thinking-exp:free",  
+                messages: 
+                        [
+                            {
+                                role: "system",
+                                content: "You are an assistant that converts user requests into Supabase fetch commands. You have the following table and column information:"
+                            },
+                            {
+                                role: "system",
+                                content: "Table: dicom, Columns: id, name, studyInstanceUid, seriesInstanceUid, patientName, modality, dicom_url"
+                            },
+                            {   role: "user", 
+                                content: `context:${context} user request: ${userMessage}` 
+                            }
+                        ],
             },
             {
                 headers:{
@@ -29,13 +40,10 @@ async function fetchOpenRouterResponse() {
 
         )
         const message = response.data.choices[0].message.content;
-        console.log("AI Response:", message);
+        return message;
 
     } catch (error) {
         console.error("Error fetching response:", error.response ? error.response.data : error.message);
     }
 
-
 }
-
-fetchOpenRouterResponse();

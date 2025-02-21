@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SendHorizontal } from 'lucide-react';
 import { Trash } from 'lucide-react';
-
+import axios from 'axios';
 
 function ChatboxPage() {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -63,9 +63,16 @@ function ChatboxPage() {
           };
         try {
             console.log("handleSubmitMessage");
+            // send msg to Supabase
             const { data, error } = await supabase
             .from("messages")
             .insert(newMessage);
+            // send msg to backend through api route
+            const llmResponse = await axios.post('http://localhost:3001/api/chat', {
+                message: input
+            });
+            console.log(llmResponse);
+
             setInput("");
         } catch (error) {
             console.log("error")
@@ -76,15 +83,10 @@ function ChatboxPage() {
     const handleInputChange = (e:React.ChangeEvent<HTMLInputElement>) => {
         setInput(e.target.value)
     }
-
-    // useEffect(() => {
-    //     console.log("input: ", input);
-    // }, [input])
-
     return (
         <div className='flex flex-col bg-slate-100 h-screen'>
             {/* display chat  */}
-            <div className="flex-grow h-full overflow-y-auto px-3" ref={scrollRef}>
+            <div className="flex-grow h-full overflow-y-auto px-3">
                 {messages?.map((msg) => (
                     <ChatMessage 
                         key={msg.id}
@@ -93,6 +95,7 @@ function ChatboxPage() {
                             content: msg.content
                         }} />
                 ))}
+                <div ref={scrollRef} />
             </div>
 
             {/* chat input */}
